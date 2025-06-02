@@ -18,7 +18,7 @@ class AppDatabase {
     final path = join(await getDatabasesPath(), 'barbadus_database.db');
     return openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await db.execute('''
         CREATE TABLE user(
@@ -34,7 +34,7 @@ class AppDatabase {
         nome TEXT,
         imagem TEXT,
         descricao TEXT,
-        preco DOUBLE
+        preco REAL
         )
         '''
         );

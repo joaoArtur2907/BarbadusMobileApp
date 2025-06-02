@@ -5,7 +5,7 @@ class Produto {
   final String nome;
   final String imagem;
   final String descricao;
-  final Double preco;
+  final double preco;
 
   Produto({
     this.id,

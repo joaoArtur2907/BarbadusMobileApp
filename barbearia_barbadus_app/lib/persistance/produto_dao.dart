@@ -2,7 +2,7 @@ import '../model/produto.dart';
 import '../db/app-database.dart';
 
 class ProdutoDao {
-  static const String table = 'students';
+  static const String table = 'produto';
 
   Future<int> insertProduto(Produto produto) async {
     final db = await AppDatabase().database;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'register_page_produto.dart';
 
 class homePage extends StatefulWidget {
   const homePage({super.key});
@@ -8,7 +9,7 @@ class homePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<homePage> {
-  // Lista de produtos (pode ser substituída por dados reais de API ou banco de dados)
+  // Lista de produtos
   final List<Map<String, dynamic>> produtos = [
     {
       'nome': 'BIO EXTRATUS',
@@ -24,7 +25,7 @@ class _HomePageState extends State<homePage> {
     },
   ];
 
-  // Função para exibir detalhes do produto
+  // Exibe os produtos function
   void _showProductDetails(BuildContext context, int index) {
     showDialog(
       context: context,
@@ -42,7 +43,7 @@ class _HomePageState extends State<homePage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Imagem ampliada
+                // Imagem
                 Container(
                   height: 200,
                   child: Image.asset(
@@ -84,7 +85,7 @@ class _HomePageState extends State<homePage> {
                   ),
                 ),
                 SizedBox(height: 25),
-                // Botão de fechar
+                // facha
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF2F2D2E),
@@ -114,6 +115,16 @@ class _HomePageState extends State<homePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFF2F2D2E),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => RegisterPageProduto()),
+          );
+        },
+        backgroundColor: Color(0xFF09BC8A),
+        child: Icon(Icons.add, color: Colors.white),
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
