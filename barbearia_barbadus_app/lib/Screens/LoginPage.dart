@@ -1,4 +1,4 @@
-import 'package:barbearia_barbadus_app/Screens/register_page.dart'; // Certifique-se de importar sua RegisterPage
+import 'package:barbearia_barbadus_app/Screens/register_page.dart';
 import 'package:barbearia_barbadus_app/Screens/homePage.dart';
 import 'package:barbearia_barbadus_app/Service/auth_service.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +24,7 @@ class _LoginPageState extends State<LoginPage> {
       if (user != null) {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const homePage()),
+          MaterialPageRoute(builder: (context) => homePage(user: user)),
         );
       }
     }
@@ -39,19 +39,18 @@ class _LoginPageState extends State<LoginPage> {
           key: _formKey,
           child: Column(
             children: [
-              // Logo
+
               Padding(
                 padding: const EdgeInsets.only(top: 60.0, bottom: 10),
                 child: Center(
                   child: Container(
                     width: 200,
                     height: 150,
-                    child: const Icon(Icons.icecream_sharp, size: 80),
+                    child: Image.asset('lib/Assets/BarbadusLogo.png'),
                   ),
                 ),
               ),
 
-              // Form Container
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 105, vertical: 10),
                 padding: const EdgeInsets.only(left: 25, right: 25, top: 40, bottom: 25),
@@ -62,7 +61,6 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 child: Column(
                   children: [
-                    // Email Field
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -93,7 +91,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Password Field
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -125,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Login Button
+                    // Login
                     Container(
                       height: 50,
                       width: 220,
@@ -143,7 +140,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     const SizedBox(height: 15),
 
-                    // Botão "Criar conta" - ADICIONADO AQUI
                     TextButton(
                       onPressed: () => Navigator.push(
                         context,

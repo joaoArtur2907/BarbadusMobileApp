@@ -1,40 +1,60 @@
+import 'package:barbearia_barbadus_app/Service/produto_service.dart';
+import 'package:barbearia_barbadus_app/model/produto.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+
+import '../model/user.dart';
+import 'loginPage.dart';
 import 'register_page_produto.dart';
 
 class homePage extends StatefulWidget {
-  const homePage({super.key});
+  final User user;
+
+  const homePage({super.key, required this.user});
+
   @override
   State<homePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<homePage> {
-  // Lista de produtos
-  final List<Map<String, dynamic>> produtos = [
-    {
-      'nome': 'BIO EXTRATUS',
-      'imagem': 'lib/Assets/shampoo.png',
-      'descricao': 'Shampoo profissional para tratamento capilar intensivo. Contém extrato de babosa e proteínas de trigo que reparam os fios danificados.',
-      'preco': 'R\$ 49,90'
-    },
-    {
-      'nome': 'BIO SAHMPOSS',
-      'imagem': 'lib/Assets/shampoo.png',
-      'descricao': 'Shampoo profissional para tratamento capilar intensivo. Contém extrato de babosa e proteínas de trigo que reparam os fios danificados.',
-      'preco': 'R\$ 49,90'
-    },
-  ];
+  final ProdutoService _produtoService = ProdutoService();
+  List<Produto> produtos = [];
 
-  // Exibe os produtos function
+  @override
+  void initState() {
+    super.initState();
+    loadProdutos();
+  }
+
+  Future<void> loadProdutos() async {
+    final lista = await _produtoService.getProdutos();
+    setState(() {
+      produtos = lista;
+    });
+  }
+
+  void _deleteProduto(int id) async {
+    await _produtoService.deleteProduto(id);
+    await loadProdutos();
+  }
+
+  void _editarProduto(Produto produto) async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RegisterPageProduto(produtoEdit: produto),
+      ),
+    );
+    await loadProdutos();
+  }
+
   void _showProductDetails(BuildContext context, int index) {
+    final produto = produtos[index];
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return Dialog(
           backgroundColor: Colors.transparent,
-          insetPadding: EdgeInsets.all(20),
           child: Container(
-            width: MediaQuery.of(context).size.width * 0.9,
             padding: EdgeInsets.all(20),
             decoration: BoxDecoration(
               color: Color(0xFFFCFFFC),
@@ -43,65 +63,56 @@ class _HomePageState extends State<homePage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Imagem
-                Container(
+                Image.network(
+                  produto.imagem,
                   height: 200,
-                  child: Image.asset(
-                    produtos[index]['imagem'],
-                    fit: BoxFit.contain,
-                  ),
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) =>
+                      Icon(Icons.image_not_supported),
                 ),
                 SizedBox(height: 20),
-                // Nome do produto
                 Text(
-                  produtos[index]['nome'],
+                  produto.nome,
                   style: TextStyle(
-                    color: Color(0xFF2F2D2E),
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 10),
-                // Preço
-                Text(
-                  produtos[index]['preco'],
-                  style: TextStyle(
                     color: Color(0xFF2F2D2E),
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 15),
-                // Descrição
+                Text(
+                  'R\$ ${produto.preco.toStringAsFixed(2)}',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10),
-                  child: Text(
-                    produtos[index]['descricao'],
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Color(0xFF2F2D2E),
-                      fontSize: 16,
-                    ),
-                  ),
+                  padding: const EdgeInsets.all(10),
+                  child: Text(produto.descricao),
                 ),
-                SizedBox(height: 25),
-                // facha
+                if (widget.user.isAdmin) ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        onPressed: () => _editarProduto(produto),
+                        child: Text('Editar'),
+                      ),
+                      SizedBox(width: 10),
+                      ElevatedButton(
+                        onPressed: () => _deleteProduto(produto.id!),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                        ),
+                        child: Text('Excluir'),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                ],
                 ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color(0xFF2F2D2E),
-                    padding: EdgeInsets.symmetric(horizontal: 40, vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
                   ),
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(
-                    'FECHAR',
-                    style: TextStyle(
-                      color: Color(0xFFFCFFFC),
-                      fontSize: 16,
-                    ),
-                  ),
+                  child: Text('Fechar', style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),
@@ -111,41 +122,62 @@ class _HomePageState extends State<homePage> {
     );
   }
 
+  void _logout() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFF2F2D2E),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
+      appBar: AppBar(
+        backgroundColor: Color(0xFF2F2D2E),
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: Text(
+          'Barbadus',
+          style: TextStyle(color: Colors.white),
+        ),
+        actions: [
+          IconButton(
+            onPressed: _logout,
+            icon: Icon(Icons.logout, color: Colors.white),
+            tooltip: 'Sair',
+          ),
+        ],
+      ),
+      floatingActionButton: widget.user.isAdmin
+          ? FloatingActionButton(
+        onPressed: () async {
+          await Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => RegisterPageProduto()),
+            MaterialPageRoute(
+              builder: (context) => RegisterPageProduto(),
+            ),
           );
+          await loadProdutos();
         },
         backgroundColor: Color(0xFF09BC8A),
         child: Icon(Icons.add, color: Colors.white),
-      ),
+      )
+          : null,
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-            // Título
             Padding(
-              padding: EdgeInsets.only(top: 60, bottom: 20),
-              child: Center(
-                child: RichText(
-                  text: TextSpan(
-                    text: 'PRODUTOS',
-                    style: TextStyle(
-                      color: Color(0xFFFCFFFC),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 45,
-                    ),
-                  ),
+              padding: EdgeInsets.only(top: 20, bottom: 20),
+              child: Text(
+                'PRODUTOS',
+                style: TextStyle(
+                  color: Color(0xFFFCFFFC),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 45,
                 ),
               ),
             ),
-
-            // Grid de produtos
             GridView.builder(
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
@@ -158,6 +190,7 @@ class _HomePageState extends State<homePage> {
               ),
               itemCount: produtos.length,
               itemBuilder: (context, index) {
+                final produto = produtos[index];
                 return GestureDetector(
                   onTap: () => _showProductDetails(context, index),
                   child: Container(
@@ -168,28 +201,26 @@ class _HomePageState extends State<homePage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Imagem do produto
                         Container(
-                          height: 120,
+                          height: 100,
                           padding: EdgeInsets.all(10),
-                          child: Image.asset(
-                            produtos[index]['imagem'],
-                            fit: BoxFit.contain,
+                          child: Image.network(
+                            produto.imagem,
                             width: 100,
                             height: 100,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) =>
+                                Icon(Icons.broken_image),
                           ),
                         ),
                         SizedBox(height: 5),
-                        // Nome do produto
                         Text(
-                          produtos[index]['nome'],
+                          produto.nome,
                           style: TextStyle(
-                            color: Color(0xFF2F2D2E),
                             fontSize: 18,
+                            color: Color(0xFF2F2D2E),
                           ),
                         ),
-                        SizedBox(height: 10),
-                        // Botão Saiba Mais
                         TextButton(
                           onPressed: () => _showProductDetails(context, index),
                           child: Text(

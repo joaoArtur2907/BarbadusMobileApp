@@ -18,16 +18,18 @@ class AppDatabase {
     final path = join(await getDatabasesPath(), 'barbadus_database.db');
     return openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: (db, version) async {
         await db.execute('''
         CREATE TABLE user(
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        nome TEXT,
-        email TEXT,
-        senha TEXT
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          nome TEXT,
+          email TEXT,
+          senha TEXT,
+          isAdmin INTEGER DEFAULT 0
         )
         ''');
+
         await db.execute('''
         CREATE TABLE produto(
         id INTEGER PRIMARY KEY AUTOINCREMENT,

@@ -1,201 +1,131 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import '../Service/produto_service.dart';
 import '../model/produto.dart';
+import '../Service/produto_service.dart';
 
 class RegisterPageProduto extends StatefulWidget {
-  const RegisterPageProduto({super.key});
+  final Produto? produtoEdit; // Se for null, está criando um novo produto
+
+  const RegisterPageProduto({super.key, this.produtoEdit});
 
   @override
-  _RegisterPageProdutoState createState() => _RegisterPageProdutoState();
+  State<RegisterPageProduto> createState() => _RegisterPageProdutoState();
 }
 
 class _RegisterPageProdutoState extends State<RegisterPageProduto> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nomeController = TextEditingController();
-  final TextEditingController _imagemController = TextEditingController();
-  final TextEditingController _descricaoController = TextEditingController();
-  final TextEditingController _precoController = TextEditingController();
+  final _nomeController = TextEditingController();
+  final _imagemController = TextEditingController();
+  final _descricaoController = TextEditingController();
+  final _precoController = TextEditingController();
+
   final ProdutoService _produtoService = ProdutoService();
 
   @override
+  void initState() {
+    super.initState();
+
+    if (widget.produtoEdit != null) {
+      _nomeController.text = widget.produtoEdit!.nome;
+      _imagemController.text = widget.produtoEdit!.imagem;
+      _descricaoController.text = widget.produtoEdit!.descricao;
+      _precoController.text = widget.produtoEdit!.preco.toString();
+    }
+  }
+
+  @override
+  void dispose() {
+    _nomeController.dispose();
+    _imagemController.dispose();
+    _descricaoController.dispose();
+    _precoController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _salvarProduto() async {
+    if (_formKey.currentState!.validate()) {
+      final novoProduto = Produto(
+        id: widget.produtoEdit?.id,
+        nome: _nomeController.text.trim(),
+        imagem: _imagemController.text.trim(),
+        descricao: _descricaoController.text.trim(),
+        preco: double.tryParse(_precoController.text) ?? 0,
+      );
+
+      if (widget.produtoEdit == null) {
+        // Cadastro novo
+        await _produtoService.registerProduto(novoProduto);
+      } else {
+        // Edição existente
+        await _produtoService.updateProduto(novoProduto);
+      }
+
+      Navigator.pop(context); // Volta para tela anterior
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final bool isEdicao = widget.produtoEdit != null;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF2F2D2E),
       appBar: AppBar(
-        title: const Text('Cadastrar Produto',
-            style: TextStyle(color: Color(0xFFFCFFFC))),
-        backgroundColor: const Color(0xFF2F2D2E),
-        iconTheme: const IconThemeData(color: Color(0xFF09BC8A)),
+        title: Text(isEdicao ? 'Editar Produto' : 'Cadastrar Produto'),
+        backgroundColor: Color(0xFF2F2D2E),
+        foregroundColor: Colors.white,
       ),
+      backgroundColor: Color(0xFFFCFFFC),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
-              // Neme
-              Text(
-                'Nome',
-                style: TextStyle(
-                  color: Color(0xFFFCFFFC),
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: 8),
               TextFormField(
                 controller: _nomeController,
-                style: TextStyle(color: Color(0xFF2F2D2E)),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Color(0xFFFCFFFC),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
-                  hintText: 'Digite o nome do produto',
-                  hintStyle: TextStyle(color: Colors.grey[600]),
-                ),
-                validator: (value) => value!.isEmpty ? 'Campo obrigatório' : null,
+                decoration: InputDecoration(labelText: 'Nome do produto'),
+                validator: (value) =>
+                value == null || value.isEmpty ? 'Informe o nome' : null,
               ),
-              const SizedBox(height: 20),
-
-              // Descrcao
-              Text(
-                'Descrição',
-                style: TextStyle(
-                  color: Color(0xFFFCFFFC),
-                  fontSize: 18,
-                ),
+              TextFormField(
+                controller: _imagemController,
+                decoration: InputDecoration(labelText: 'URL da imagem'),
+                validator: (value) =>
+                value == null || value.isEmpty ? 'Informe a imagem' : null,
               ),
-              const SizedBox(height: 8),
               TextFormField(
                 controller: _descricaoController,
-                style: TextStyle(color: Color(0xFF2F2D2E)),
-                maxLines: 3,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Color(0xFFFCFFFC),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
-                  hintText: 'Digite a descrição',
-                  hintStyle: TextStyle(color: Colors.grey[600]),
-                ),
-                validator: (value) => value!.isEmpty ? 'Campo obrigatório' : null,
+                decoration: InputDecoration(labelText: 'Descrição'),
+                validator: (value) =>
+                value == null || value.isEmpty ? 'Informe a descrição' : null,
               ),
-              const SizedBox(height: 20),
-
-              // preco
-              Text(
-                'Preço',
-                style: TextStyle(
-                  color: Color(0xFFFCFFFC),
-                  fontSize: 18,
-                ),
-              ),
-              const SizedBox(height: 8),
               TextFormField(
                 controller: _precoController,
-                style: TextStyle(color: Color(0xFF2F2D2E)),
+                decoration: InputDecoration(labelText: 'Preço'),
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-                ],
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Color(0xFFFCFFFC),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
-                  hintText: 'R\$ 0,00',
-                  hintStyle: TextStyle(color: Colors.grey[600]),
-                  prefixText: 'R\$ ',
-                ),
                 validator: (value) {
-                  if (value!.isEmpty) return 'Campo obrigatório';
-                  if (double.tryParse(value.replaceAll(',', '.')) == null) {
-                    return 'Digite um valor válido';
+                  final parsed = double.tryParse(value ?? '');
+                  if (parsed == null || parsed <= 0) {
+                    return 'Preço inválido';
                   }
                   return null;
                 },
               ),
-              const SizedBox(height: 20),
-
-              //  foto
-              Text(
-                'Imagem',
-                style: TextStyle(
-                  color: Color(0xFFFCFFFC),
-                  fontSize: 18,
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: _salvarProduto,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFF09BC8A),
+                  padding: EdgeInsets.symmetric(vertical: 16),
                 ),
-              ),
-              const SizedBox(height: 8),
-              TextFormField(
-                controller: _imagemController,
-                style: TextStyle(color: Color(0xFF2F2D2E)),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Color(0xFFFCFFFC),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide.none,
-                  ),
-                  hintText: 'Caminho da imagem',
-                  hintStyle: TextStyle(color: Colors.grey[600]),
+                child: Text(
+                  isEdicao ? 'Salvar Alterações' : 'Cadastrar Produto',
+                  style: TextStyle(fontSize: 16),
                 ),
-                validator: (value) => value!.isEmpty ? 'Campo obrigatório' : null,
-              ),
-              const SizedBox(height: 30),
-
-              // salvar
-              Container(
-                height: 50,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                  color: const Color(0xFF09BC8A),
-                ),
-                child: TextButton(
-                  onPressed: _register,
-                  child: const Text(
-                    'CADASTRAR',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
+              )
             ],
           ),
         ),
       ),
     );
-  }
-
-  void _register() async {
-    if (_formKey.currentState!.validate()) {
-      try {
-        final preco = double.parse(_precoController.text.replaceAll(',', '.'));
-        final produto = Produto(
-          nome: _nomeController.text,
-          descricao: _descricaoController.text,
-          imagem: _imagemController.text,
-          preco: preco,
-        );
-        await _produtoService.registerProduto(produto);
-        Navigator.pop(context);
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erro: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
   }
 }

@@ -9,6 +9,7 @@ class UserDao{
     return db.insert(table, user.toMap());
   }
 
+
   Future<User?> getUser(String email, String senha) async {
     final db = await AppDatabase().database;
     final result = await db.query(
