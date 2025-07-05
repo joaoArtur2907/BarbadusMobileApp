@@ -3,7 +3,7 @@ import '../model/produto.dart';
 import '../Service/produto_service.dart';
 
 class RegisterPageProduto extends StatefulWidget {
-  final Produto? produtoEdit; // Se for null, está criando um novo produto
+  final Produto? produtoEdit; // serve para edit de um antigo ou crir um novo, se for null está criando um novo
 
   const RegisterPageProduto({super.key, this.produtoEdit});
 
@@ -59,7 +59,7 @@ class _RegisterPageProdutoState extends State<RegisterPageProduto> {
         await _produtoService.updateProduto(novoProduto);
       }
 
-      Navigator.pop(context); // Volta para tela anterior
+      Navigator.pop(context);
     }
   }
 
