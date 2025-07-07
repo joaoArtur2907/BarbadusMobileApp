@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../model/compra.dart';
+import '../model/compra_item.dart';
 import '../Service/compra_service.dart';
+import '../persistance/compraItem_dao.dart';
 
 class ComprasPage extends StatefulWidget {
   const ComprasPage({super.key});
@@ -11,7 +13,10 @@ class ComprasPage extends StatefulWidget {
 
 class _ComprasPageState extends State<ComprasPage> {
   final CompraService _compraService = CompraService();
+  final CompraItemDao _compraItemDao = CompraItemDao();
+
   List<Compra> compras = [];
+  Map<int, List<CompraItem>> itensPorCompra = {};
 
   @override
   void initState() {
@@ -21,8 +26,16 @@ class _ComprasPageState extends State<ComprasPage> {
 
   Future<void> _carregarCompras() async {
     final lista = await _compraService.listarCompras();
+
+    final Map<int, List<CompraItem>> mapaItens = {};
+    for (final compra in lista) {
+      final itens = await _compraItemDao.listarItensPorCompra(compra.id!);
+      mapaItens[compra.id!] = itens;
+    }
+
     setState(() {
       compras = lista;
+      itensPorCompra = mapaItens;
     });
   }
 
@@ -46,8 +59,11 @@ class _ComprasPageState extends State<ComprasPage> {
         itemCount: compras.length,
         itemBuilder: (context, index) {
           final compra = compras[index];
+          final itens = itensPorCompra[compra.id] ?? [];
+
           return Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            margin:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
@@ -78,6 +94,20 @@ class _ComprasPageState extends State<ComprasPage> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Itens:',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  ...itens.map((item) => Text(
+                    '${item.quantidade}x ${item.produtoNome} '
+                        '(R\$ ${item.precoUnitario.toStringAsFixed(2)})',
+                    style: const TextStyle(fontSize: 15),
+                  )),
                 ],
               ),
             ),

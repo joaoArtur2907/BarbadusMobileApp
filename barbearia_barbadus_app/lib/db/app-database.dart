@@ -55,12 +55,25 @@ class AppDatabase {
         '''
         );
 
-        await db.insert('user', {
-          'nome': 'Administrador',
-          'email': 'admin@gmail.com',
-          'senha': '12345',
-          'isAdmin': 1
-        });
+        // await db.insert('user', {
+        //   'nome': 'Administrador',
+        //   'email': 'admin@gmail.com',
+        //   'senha': '12345',
+        //   'isAdmin': 1
+        // });
+
+        await db.execute('''
+        CREATE TABLE IF NOT EXISTS compra_item (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          compra_id INTEGER,
+          produto_nome TEXT,
+          quantidade INTEGER,
+          preco_unitario REAL,
+          FOREIGN KEY (compra_id) REFERENCES compra (id)
+        )
+        '''
+        );
+
 
       }
     );

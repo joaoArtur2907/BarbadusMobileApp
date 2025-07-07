@@ -33,7 +33,7 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
       total: _precoTotal,
     );
 
-    await _compraService.registrarCompra(compra);
+    await _compraService.registrarCompra(compra, widget.carrinho);
 
     setState(() {
       widget.carrinho.clear();
