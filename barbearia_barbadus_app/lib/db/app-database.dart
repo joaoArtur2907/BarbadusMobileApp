@@ -15,10 +15,14 @@ class AppDatabase {
   }
 
   Future<Database> _initDatabase() async {
+    final dbPath = await getDatabasesPath();
     final path = join(await getDatabasesPath(), 'barbadus_database.db');
+
+    // await deleteDatabase(path);
+
     return openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: (db, version) async {
         await db.execute('''
         CREATE TABLE user(
@@ -40,6 +44,24 @@ class AppDatabase {
         )
         '''
         );
+
+        await db.execute('''
+        CREATE TABLE IF NOT EXISTS compra (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nomeComprador TEXT,
+        endereco TEXT,
+        total REAL
+        );
+        '''
+        );
+
+        await db.insert('user', {
+          'nome': 'Administrador',
+          'email': 'admin@gmail.com',
+          'senha': '12345',
+          'isAdmin': 1
+        });
+
       }
     );
   }

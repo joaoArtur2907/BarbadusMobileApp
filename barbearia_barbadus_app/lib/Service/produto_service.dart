@@ -1,5 +1,4 @@
 import 'package:barbearia_barbadus_app/db/app-database.dart';
-
 import '../persistance/produto_dao.dart';
 import '../model/produto.dart';
 

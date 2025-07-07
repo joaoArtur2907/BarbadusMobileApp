@@ -6,6 +6,7 @@ import 'package:barbearia_barbadus_app/Screens/register_page_produto.dart';
 import 'package:barbearia_barbadus_app/Screens/loginPage.dart';
 import 'package:barbearia_barbadus_app/Screens/CarrinhoPage.dart';
 import 'package:barbearia_barbadus_app/Service/produto_service.dart';
+import 'package:barbearia_barbadus_app/Screens/compras_page.dart';
 
 class homePage extends StatefulWidget {
   final User user;
@@ -149,6 +150,13 @@ class _HomePageState extends State<homePage> {
     );
   }
 
+  void _verCompras() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const ComprasPage()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -251,7 +259,8 @@ class _HomePageState extends State<homePage> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => CarrinhoPage(carrinho: carrinho),
+                      builder: (_) => CarrinhoPage(carrinho: carrinho, user: widget.user),
+
                     ),
                   );
                 },
@@ -261,9 +270,18 @@ class _HomePageState extends State<homePage> {
           Positioned(
             right: 10,
             top: 40,
-            child: IconButton(
-              icon: Icon(Icons.logout, color: Colors.white),
-              onPressed: _logoff,
+            child: Column(
+              children: [
+                IconButton(
+                  icon: Icon(Icons.logout, color: Colors.white),
+                  onPressed: _logoff,
+                ),
+                if (widget.user.isAdmin)
+                  IconButton(
+                    icon: Icon(Icons.list_alt, color: Colors.white),
+                    onPressed: _verCompras,
+                  ),
+              ],
             ),
           ),
         ],
