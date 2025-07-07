@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import '../model/produto.dart';
 import '../model/carrinho_item.dart';
+import '../model/user.dart';
+import '../model/compra.dart';
+import '../Service/compra_service.dart';
 
 class CarrinhoPage extends StatefulWidget {
   final List<CarrinhoItem> carrinho;
+  final User user;
 
-  const CarrinhoPage({super.key, required this.carrinho});
+  const CarrinhoPage({super.key, required this.carrinho, required this.user});
 
   @override
   State<CarrinhoPage> createState() => _CarrinhoPageState();
@@ -13,8 +17,9 @@ class CarrinhoPage extends StatefulWidget {
 
 class _CarrinhoPageState extends State<CarrinhoPage> {
   final TextEditingController _enderecoController = TextEditingController();
+  final CompraService _compraService = CompraService();
 
-  void _finalizarCompra() {
+  void _finalizarCompra() async {
     if (_enderecoController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Por favor, insira o endereço de entrega.')),
@@ -22,15 +27,24 @@ class _CarrinhoPageState extends State<CarrinhoPage> {
       return;
     }
 
+    final compra = Compra(
+      nomeComprador: widget.user.nome,
+      endereco: _enderecoController.text,
+      total: _precoTotal,
+    );
+
+    await _compraService.registrarCompra(compra, widget.carrinho);
+
     setState(() {
       widget.carrinho.clear();
+      _enderecoController.clear();
     });
 
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         title: Text('Compra bem sucedida!'),
-        content: Text('Entrega para: ${_enderecoController.text}'),
+        content: Text('Entrega para: ${compra.endereco}'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

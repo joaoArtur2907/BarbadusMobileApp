@@ -3,7 +3,7 @@ import '../model/produto.dart';
 import '../Service/produto_service.dart';
 
 class RegisterPageProduto extends StatefulWidget {
-  final Produto? produtoEdit; // serve para edit de um antigo ou crir um novo, se for null está criando um novo
+  final Produto? produtoEdit;
 
   const RegisterPageProduto({super.key, this.produtoEdit});
 
@@ -23,7 +23,6 @@ class _RegisterPageProdutoState extends State<RegisterPageProduto> {
   @override
   void initState() {
     super.initState();
-
     if (widget.produtoEdit != null) {
       _nomeController.text = widget.produtoEdit!.nome;
       _imagemController.text = widget.produtoEdit!.imagem;
@@ -52,10 +51,8 @@ class _RegisterPageProdutoState extends State<RegisterPageProduto> {
       );
 
       if (widget.produtoEdit == null) {
-        // Cadastro novo
         await _produtoService.registerProduto(novoProduto);
       } else {
-        // Edição existente
         await _produtoService.updateProduto(novoProduto);
       }
 
@@ -68,39 +65,42 @@ class _RegisterPageProdutoState extends State<RegisterPageProduto> {
     final bool isEdicao = widget.produtoEdit != null;
 
     return Scaffold(
+      backgroundColor: const Color(0xFF2F2D2E),
       appBar: AppBar(
         title: Text(isEdicao ? 'Editar Produto' : 'Cadastrar Produto'),
-        backgroundColor: Color(0xFF2F2D2E),
+        backgroundColor: const Color(0xFF2F2D2E),
         foregroundColor: Colors.white,
       ),
-      backgroundColor: Color(0xFFFCFFFC),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _formKey,
           child: ListView(
             children: [
-              TextFormField(
+              _buildInput(
                 controller: _nomeController,
-                decoration: InputDecoration(labelText: 'Nome do produto'),
+                label: 'Nome do produto',
                 validator: (value) =>
                 value == null || value.isEmpty ? 'Informe o nome' : null,
               ),
-              TextFormField(
+              const SizedBox(height: 16),
+              _buildInput(
                 controller: _imagemController,
-                decoration: InputDecoration(labelText: 'URL da imagem'),
+                label: 'URL da imagem',
                 validator: (value) =>
                 value == null || value.isEmpty ? 'Informe a imagem' : null,
               ),
-              TextFormField(
+              const SizedBox(height: 16),
+              _buildInput(
                 controller: _descricaoController,
-                decoration: InputDecoration(labelText: 'Descrição'),
+                label: 'Descrição',
                 validator: (value) =>
                 value == null || value.isEmpty ? 'Informe a descrição' : null,
               ),
-              TextFormField(
+              const SizedBox(height: 16),
+              _buildInput(
                 controller: _precoController,
-                decoration: InputDecoration(labelText: 'Preço'),
+                label: 'Preço',
                 keyboardType: TextInputType.numberWithOptions(decimal: true),
                 validator: (value) {
                   final parsed = double.tryParse(value ?? '');
@@ -110,22 +110,54 @@ class _RegisterPageProdutoState extends State<RegisterPageProduto> {
                   return null;
                 },
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: _salvarProduto,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFF09BC8A),
-                  padding: EdgeInsets.symmetric(vertical: 16),
+                  backgroundColor: const Color(0xFF09BC8A),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
                 child: Text(
                   isEdicao ? 'Salvar Alterações' : 'Cadastrar Produto',
-                  style: TextStyle(fontSize: 16),
+                  style: const TextStyle(fontSize: 16, color: Colors.white),
                 ),
               )
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildInput({
+    required TextEditingController controller,
+    required String label,
+    TextInputType keyboardType = TextInputType.text,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      style: const TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(color: Colors.white70),
+        filled: true,
+        fillColor: const Color(0xFF3E3E3E),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        enabledBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.white38),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.white),
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+      validator: validator,
     );
   }
 }

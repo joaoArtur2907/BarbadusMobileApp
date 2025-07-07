@@ -9,6 +9,8 @@ void main() async {
   await AppDatabase().database;
   await AuthService().criarAdminParaTeste();
 
+
+
   runApp(const App());
 }
 
